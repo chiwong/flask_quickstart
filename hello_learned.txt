@@ -1,0 +1,83 @@
+Date: 2/22/2013
+On this date, I will attempt to set up Flask on an Amazon EC2 instance. Will
+try to set up Nginx as the webserver and uWSGI as the python interface between
+Flask and Nginx. Learned today that uWSGI is the specification that bridges a
+web application such as Flask with a web server such as Nginx, so that the two
+layers can talk to each other since both are WSGI compliant. WSGI
+specifications basically allow a WSGI compliant web application (such as
+Flask) to use ANY WSGI compliant web server (such as Nginx).
+
+INSTALL VIRTUALENV
+#Within default Amazon EC2 instance, to install virtualenv
+sudo pip install virtualenv
+#Then create a venv folder within the project folder
+mkdir myproject
+cd myproject
+virtualenv venv
+#To activate and use virtualenv for myproject, in the shell, type
+. ./venv/bin/activate
+#To deactivate, while in virtualenv, type
+deactivate
+#Now that virtualenv is setup and activated, install Flask
+pip install Flask
+
+Set up Git
+#while in the project directory, to initialize git, type
+git init
+
+#to queue up file/code changes that need to be committed, type
+git add some_file_to_be_commited
+
+#to commit the file, type
+git commit -m "some message you type in"
+# the -m flag means, "message", and the argument after is the message
+
+#to push the file to github, you have to first set up a repository on github
+and then you will have a remote url to push the code to
+#to set up git so it knows to push to a remote location, type
+git remote add origin git@github.com:chiwong/test.git
+
+#to push commits to the remote repository
+git push -u origin master
+
+Install uWSGI, nginx on EC2
+#tutorials on how to set up Flask on EC2
+https://github.com/d5/docs/wiki/Installing-Flask-on-Amazon-EC2
+http://b.h6o6.com/configuring-multiple-flask-sites-with-uwsgi-and-nginx-on-an-amazon-ec2-instance
+#In order to install uwsgi, the following dependencies must be installed
+sudo yum install python26 python26-devel make automake nginx gcc gcc-c++
+python-setuptools git
+#Now we can use pip to install uwsgi
+sudo pip install uwsgi virtualenv
+
+Setup nginx web server
+#Next, we need to edit the nginx.conf configuration file to establish the
+communication port with our web app
+sudo vi /etc/nginx/nginx.conf
+#Inside the nginx.conf file, find the location / section, and change it to
+location / {
+	include uwsgi_params;
+	uwsgi_pass 127.0.0.1:10080;
+#Start up nginx server
+sudo service nginx start
+#Finally, make nginx auto-start after EC2 reboots
+chkconfig nginx on
+
+Setup uWSGI server
+#Next, we need to create configure the uWSGI server so it knows what port to
+communicate with nginx, put this yaml file in the same directory and level as
+the hello.py app
+vi app.yaml
+#Inside the app.yaml file, create this
+uwsgi:
+  socket: 127.0.0.1:10080
+  master: 1
+  workers: 1
+  chmod-socket: 666
+  auto-procname: 1
+  python-path: .
+  pidfile: /tmp/uwsgi.pid
+  daemonize: /var/log/uwsgi.log
+  module: hello:app
+#Start up the uWSGI server
+uwsgi --yaml app.yaml
