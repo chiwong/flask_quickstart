@@ -29,5 +29,20 @@ def multiply_two(x, y):
 	z = x * y
 	return '%d * %d = %d' % (x, y, z)
 
+# Unique URLs / Redirection Behavior
+# This example shows that when a route ends in a trailing slash '/'
+# then a user that omits or includesg the trailing slash redirects to the
+# same endpoint
+@app.route('/projects/')
+def projects():
+	return 'The project page'
+
+# However, when a URL route defintion does not define a trailing slash
+# then if a user omits the trailing slash in a url call, an error
+# will occur
+@app.route('/about')
+def about():
+	return 'The about page'
+
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=10080)
