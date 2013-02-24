@@ -8,3 +8,4 @@ uwsgi:
   pidfile: /tmp/uwsgi.pid
   daemonize: /var/log/uwsgi.log
   module: hello:app
+  touch-reload: /home/ec2-user/flask_quickstart/hello.py
