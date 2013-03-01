@@ -1,13 +1,9 @@
-from flask import Flask
+from flask import Flask, render_template
 app = Flask(__name__)
 
 @app.route('/')
 def index():
 	return 'This is the index page!'
-
-@app.route('/hello')
-def hello_world():
-	return 'Hello World!!'
 
 # One example of Variable Routing, used to pass
 # variables from an url into a Flask function
@@ -46,3 +42,9 @@ def about():
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=10080)
+
+# Rendering Templates
+@app.route('/hello/')
+@app.route('/hello/<name>')
+def hello(name=None):
+	return render_template('hello.html', name=name)
